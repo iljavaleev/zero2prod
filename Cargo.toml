@@ -16,9 +16,11 @@ config = "0.11"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 reqwest = { version = "0.13", features = ["json"] }
 serde = { version = "1", features = ["derive"]}
+uuid = { version = "1.23.1", features = ["v4", "serde"] }
+chrono = "0.4.15"
 
 [dependencies.sqlx]
-version = "0.8.6"
+version = "0.9.0"
 default-features = false
 features = [
     "runtime-tokio", 
@@ -27,5 +29,5 @@ features = [
     "postgres", 
     "uuid", 
     "chrono", 
-    "migrate"
+    "migrate",
 ]
