@@ -84,12 +84,10 @@ jobs:
         image: postgres:18
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
+          POSTGRES_PASSWORD: postgres
           POSTGRES_DB: newsletter
         ports:
           - 5432:5432
-
-
 
     steps:
       - uses: actions/checkout@v5
