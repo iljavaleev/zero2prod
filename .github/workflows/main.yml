@@ -100,9 +100,6 @@ jobs:
           --no-default-features
           --locked
       
-      - run: cargo install cargo-tarpaulin
-      - run: cargo tarpaulin --ignore-tests
-
       - name: Create app user in Postgres
         run: |
           sudo apt-get install postgresql-client
@@ -125,3 +122,5 @@ jobs:
           name: "Coverage report"
           path: coverage/
 
+      - run: cargo install cargo-tarpaulin
+      - run: cargo tarpaulin --ignore-tests
