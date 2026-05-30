@@ -1,31 +1,26 @@
-use zero2prod::configuration::{get_configuration, DatabaseSettings};
-use zero2prod::startup::run;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
 use uuid::Uuid;
-
+use zero2prod::configuration::{DatabaseSettings, get_configuration};
+use zero2prod::startup::run;
 
 pub struct TestApp {
     pub address: String,
     pub db_pool: PgPool,
 }
 
-async fn spawn_app() -> TestApp{
-    let listener = TcpListener::bind("127.0.0.1:0")
-        .expect("Failed to bind random port");
+async fn spawn_app() -> TestApp {
+    let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
     let port = listener.local_addr().unwrap().port();
     let address = format!("http://127.0.0.1:{}", port);
 
-
     let mut conf = get_configuration().expect("Failed to read configuration.");
     conf.database.database_name = Uuid::new_v4().to_string();
-    
-    let connection = 
-        configure_database(&conf.database).await;
 
-    let server = run(listener, connection.clone())
-        .expect("Failed to bind address");
-    
+    let connection = configure_database(&conf.database).await;
+
+    let server = run(listener, connection.clone()).expect("Failed to bind address");
+
     let _ = tokio::spawn(server);
     TestApp {
         address,
@@ -33,42 +28,36 @@ async fn spawn_app() -> TestApp{
     }
 }
 
-pub async fn configure_database(config: &DatabaseSettings) -> PgPool{
-    let mut connection = 
-        PgConnection::connect(&config.connection_string_without_db())
+pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
+    let mut connection = PgConnection::connect(&config.connection_string_without_db())
         .await
         .expect("Failed to connect to Postgres");
 
-    let query: &'static str = 
-        Box::leak(format!(r#"CREATE DATABASE "{}";"#, config.database_name)
-        .into_boxed_str());
-    
+    let query: &'static str =
+        Box::leak(format!(r#"CREATE DATABASE "{}";"#, config.database_name).into_boxed_str());
+
     connection
         .execute(query)
         .await
         .expect("Failed to create database.");
 
     // Migrate database
-    let connection_pool = PgPool::connect(
-        &config.connection_string()
-    )
+    let connection_pool = PgPool::connect(&config.connection_string())
         .await
         .expect("Failed to connect to Postgres.");
-    
+
     sqlx::migrate!("./migrations")
         .run(&connection_pool)
         .await
         .expect("Failed to migrate the database");
 
     connection_pool
-} 
-
-
+}
 
 #[tokio::test]
-async fn subscribe_returns_a_200_for_valid_form_data(){
-    let TestApp {address, db_pool } = spawn_app().await;
-   
+async fn subscribe_returns_a_200_for_valid_form_data() {
+    let TestApp { address, db_pool } = spawn_app().await;
+
     let client = reqwest::Client::new();
 
     let body = "name=le%20guin&email=ursula_le_guin%40gmail.com";
@@ -89,35 +78,35 @@ async fn subscribe_returns_a_200_for_valid_form_data(){
 
     assert_eq!(saved.email, "ursula_le_guin@gmail.com");
     assert_eq!(saved.name, "le guin");
-
-
 }
 
-
 #[tokio::test]
-async fn subscribe_returns_a_400_when_data_is_missing(){
-    let TestApp {address, db_pool:_ } = spawn_app().await;
+async fn subscribe_returns_a_400_when_data_is_missing() {
+    let TestApp {
+        address,
+        db_pool: _,
+    } = spawn_app().await;
     let client = reqwest::Client::new();
     let test_cases = vec![
         ("name=le%20guin", "missing the email"),
         ("email=ursula_le_guin%40gmail.com", "missing the name"),
-        ("", "missing both name and email")
+        ("", "missing both name and email"),
     ];
 
     for (invalid_body, error_message) in test_cases {
         let response = client
             .post(&format!("{}/subscriptions", &address))
-            .header("Content-Type", 
-            "application/x-www-form-urlencoded")
+            .header("Content-Type", "application/x-www-form-urlencoded")
             .body(invalid_body)
             .send()
             .await
             .expect("Failed to execute request.");
-    
 
-    assert_eq!(400, response.status().as_u16(), 
-        "The API did not fail with 400 Bad Request when the payload was {}.",
-        error_message
-    );
+        assert_eq!(
+            400,
+            response.status().as_u16(),
+            "The API did not fail with 400 Bad Request when the payload was {}.",
+            error_message
+        );
     }
 }

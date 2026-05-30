@@ -1,20 +1,18 @@
-use actix_web::{App, HttpServer, dev::Server, web};
-use std::net::TcpListener;
 use crate::routes::{health_check, subscribe};
-use sqlx::{PgPool};
+use actix_web::{App, HttpServer, dev::Server, web};
+use sqlx::PgPool;
+use std::net::TcpListener;
 
-
-pub fn run(
-    listener: TcpListener, connection: PgPool
-) -> std::io::Result<Server> {
+pub fn run(listener: TcpListener, connection: PgPool) -> std::io::Result<Server> {
     let db_pool = web::Data::new(connection);
 
     // Capture `connection` from the surrounding environment with move
-    let server = HttpServer::new(move || { // no params
+    let server = HttpServer::new(move || {
+        // no params
         App::new()
-        .route("/health_check", web::get().to(health_check))
-        .route("/subscriptions", web::post().to(subscribe))
-        .app_data(db_pool.clone())
+            .route("/health_check", web::get().to(health_check))
+            .route("/subscriptions", web::post().to(subscribe))
+            .app_data(db_pool.clone())
     })
     .listen(listener)?
     .run();

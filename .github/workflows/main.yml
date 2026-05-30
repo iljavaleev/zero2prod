@@ -27,7 +27,7 @@ jobs:
         # When you map ports using the ports keyword, GitHub uses the --publish command to publish the container’s ports to the Docker host
         # Opens tcp port 5432 on the host and service container
         ports:
-          - 5434:5432
+          - 5432:5432
     
     
     steps:
@@ -79,13 +79,13 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:14
+        image: postgres:18
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
           POSTGRES_DB: postgres
         ports:
-          - 5434:5432
+          - 5432:5432
 
 
 
