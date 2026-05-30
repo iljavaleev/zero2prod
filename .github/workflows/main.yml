@@ -44,10 +44,10 @@ jobs:
           sudo apt-get install postgresql-client
 
           CREATE_QUERY="CREATE USER ${APP_USER} WITH PASSWORD '${APP_USER_PWD}';"
-          PGPASSWORD="password" psql -U "postgres" -h "localhost" -c "${CREATE_QUERY}"
+          PGPASSWORD="postgres" psql -U "postgres" -h "localhost" -c "${CREATE_QUERY}"
 
           GRANT_QUERY="ALTER USER ${APP_USER} CREATEDB;"
-          PGPASSWORD="password" psql -U "postgres" -h "localhost" -c "${GRANT_QUERY}"
+          PGPASSWORD="postgres" psql -U "postgres" -h "localhost" -c "${GRANT_QUERY}"
 
       - name: Migrate database
         run: SKIP_DOCKER=true ./scripts/init_db.sh
