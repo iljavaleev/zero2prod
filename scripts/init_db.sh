@@ -16,9 +16,9 @@ if ! [ -x "$(command -v sqlx)" ]; then
 fi
 
 DB_USER="${POSTGRES_USER:=postgres}"
-DB_PASSWORD="${POSTGRES_PASSWORD:=password}"
+DB_PASSWORD="${POSTGRES_PASSWORD:=postgres}"
 DB_NAME="${POSTGRES_DB:=newsletter}"
-DB_PORT="${POSTGRES_PORT:=5434}"
+DB_PORT="${POSTGRES_PORT:=5432}"
 
 
 # SKIP_DOCKER=true ./scripts/init_db.sh if container is already running 
@@ -29,7 +29,7 @@ then
       -e POSTGRES_PASSWORD=${DB_PASSWORD} \
       -e POSTGRES_DB=${DB_NAME} \
       -p "${DB_PORT}":5432 \
-      -d postgres \
+      --rm -d  --name postgres \
       postgres -N 1000
 fi
 
