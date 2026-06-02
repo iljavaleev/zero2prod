@@ -8,7 +8,6 @@ pub fn run(listener: TcpListener, connection: PgPool) -> std::io::Result<Server>
 
     // Capture `connection` from the surrounding environment with move
     let server = HttpServer::new(move || {
-        // no params
         App::new()
             .route("/health_check", web::get().to(health_check))
             .route("/subscriptions", web::post().to(subscribe))

@@ -2,6 +2,7 @@
 
 #[derive(serde::Deserialize)]
 pub struct Settings {
+    // exact names must be in yml file
     pub database: DatabaseSettings,
     pub application_port: u16,
 }
