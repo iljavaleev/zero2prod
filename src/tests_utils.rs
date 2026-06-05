@@ -10,12 +10,11 @@ pub struct TestApp {
     pub db_pool: PgPool,
 }
 
-
 pub async fn spawn_app() -> TestApp {
     // create random port
     let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
     let port = listener.local_addr().unwrap().port();
-    
+
     // get address with random port for return
     let address = format!("http://127.0.0.1:{}", port);
 
@@ -26,17 +25,16 @@ pub async fn spawn_app() -> TestApp {
     let connection = configure_database(&conf.database).await;
 
     let server = run(listener, connection.clone()).expect("Failed to bind address");
-    
+
     // takes a future and hands it over to the runtime for polling, without waiting for its completion
     // tokio::test spins up a new runtime at the beginning of each test case
-    
+
     let _ = tokio::spawn(server);
     TestApp {
         address,
         db_pool: connection,
     }
 }
-
 
 pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
     let mut connection = PgConnection::connect(&config.connection_string_without_db())
