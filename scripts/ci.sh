@@ -1,5 +1,5 @@
 #!/bin/bash
-cargo sqlx prepare
+cargo sqlx prepare -- --all-targets --all-features
 cargo clippy
 
 cargo fmt 
